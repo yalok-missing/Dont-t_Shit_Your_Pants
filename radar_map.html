@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>화장실 레이더 맵</title>
+<style>
+  body {
+    margin: 0;
+    background: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  canvas {
+    border: 2px solid white;
+  }
+  button {
+    margin-top: 30px;
+    padding: 10px 20px;
+    background-color: #00ff44;
+    color: rgb(0, 0, 0);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+  
+  <canvas id="mapCanvas" width="1080" height="640"></canvas>
+  <button onclick="goBack()">뒤로가기</button>
+<script>
+const canvas = document.getElementById("mapCanvas");
+const ctx = canvas.getContext("2d");
+
+// 사용자 위치 (빨간 점)
+const userPos = { x: 37, y: 80 };
+
+// 화장실 목록
+const toilets = [
+  { id: "T1", x: 920, y: 470, available: true },
+  { id: "T2", x: 920, y: 535, available: false },
+  { id: "T3", x: 920, y: 600, available: false }
+];
+
+let radius = 0;
+let glitchOpacity = 1; // 글리치 강도
+let radarActive = false;
+
+// 글리치 효과
+function drawGlitch() {
+  // 가로 선 글리치
+  for (let i = 0; i < 20; i++) {
+    const y = Math.random() * canvas.height;
+    const height = 1 + Math.random() * 2;
+    const offset = Math.random() * 10 - 5;
+    ctx.fillStyle = `rgba(0,255,0,${Math.random() * 0.2 * glitchOpacity})`;
+    ctx.fillRect(offset, y, canvas.width, height);
+  }
+  // 작은 픽셀 노이즈
+  for (let i = 0; i < 200; i++) {
+    const x = Math.random() * canvas.width;
+    const y = Math.random() * canvas.height;
+    ctx.fillStyle = `rgba(0,255,0,${Math.random() * 0.1 * glitchOpacity})`;
+    ctx.fillRect(x, y, 1, 1);
+  }
+}
+
+function draw() {
+  ctx.fillStyle = "rgba(0,0,0,0.1)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  // 구조물
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 440, 455,210);
+  ctx.fillRect(685, 498, 30,200);
+  ctx.fillRect(450, 503, 60,200);
+  ctx.fillRect(980, 438, 120,200);
+
+  ctx.beginPath();
+  ctx.rect(0, 0, canvas.width, canvas.height);
+  ctx.rect(0, 0, 280,200);
+  ctx.rect(280, 0, 280,200);
+  ctx.rect(560, 0, 280,200);
+  ctx.rect(840, 0, 280,200);
+  ctx.rect(0, 438, 1083,200);
+  ctx.rect(450, 503, 60,200);
+  ctx.rect(685, 498, 30,200);
+  ctx.rect(860, 438, 120,65);
+  ctx.rect(860, 503, 120,65);
+  ctx.rect(860, 568, 120,65);
+  ctx.strokeStyle = "white";
+  ctx.lineWidth = 10;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.rect(456, 438, 40,0);
+  ctx.rect(15, 200, 40,0);
+  ctx.rect(295, 200, 40,0);
+  ctx.rect(575, 200, 40,0);
+  ctx.rect(855, 200, 40,0);
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = 10;
+  ctx.stroke();
+
+  // 사용자 위치
+  ctx.beginPath();
+  ctx.arc(userPos.x, userPos.y, 8, 0, Math.PI * 2);
+  ctx.fillStyle = "red";
+  ctx.fill();
+
+  // 글리치가 남아있으면 표시
+  if (glitchOpacity > 0) {
+    drawGlitch();
+    glitchOpacity -= 0.005; // 글리치 점차 감소
+    if (glitchOpacity <= 0) {
+      glitchOpacity = 0;
+      radarActive = true; // 글리치가 끝나면 레이더 활성화
+    }
+  }
+
+  // 레이더 원 + 화장실 표시
+  if (radarActive) {
+    // 레이더 원
+    ctx.beginPath();
+    ctx.arc(userPos.x, userPos.y, radius, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(0,255,0,0.4)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // 화장실
+    toilets.forEach(t => {
+      const dist = Math.hypot(userPos.x - t.x, userPos.y - t.y);
+      if (dist < radius) {
+        ctx.beginPath();
+        ctx.rect(t.x - 15, t.y - 15, 30, 30);
+        ctx.fillStyle = t.available ? "lime" : "red";
+        ctx.fill();
+        ctx.strokeStyle = "white";
+        ctx.stroke();
+      }
+    });
+
+    // 레이더 반경 증가
+    radius += 5;
+    if (radius > 1200) radius = 0;
+  }
+
+  requestAnimationFrame(draw);
+}
+
+draw();
+
+// 클릭 이벤트
+canvas.addEventListener("click", (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  toilets.forEach(t => {
+    if (x > t.x - 15 && x < t.x + 15 && y > t.y - 15 && y < t.y + 15) {
+      window.location.href = `toilet_detail.html?id=${t.id}`;
+    }
+  });
+});
+function goBack() {
+  window.location.href = "index.html";
+}
+</script>
+
+
+
+
+</body>
+</html>

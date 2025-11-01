@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>화장실 정보</title>
+<style>
+  body {
+    background: black;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    font-family: 'Noto Sans KR', sans-serif;
+    overflow: hidden;
+  }
+  .info {
+    text-align: center;
+    font-size: 24px;
+    transition: transform 0.3s ease, color 0.3s ease;
+  }
+  .info.animate {
+    transform: scale(1.4);
+    color: #00ff99;
+  }
+  button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #00cc66;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  img {
+    width: 120px;
+    margin-top: 30px;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  img:active {
+    transform: scale(0.95);
+  }
+
+  /* 휴지 조각 애니메이션 */
+  .piece {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 3px;
+    opacity: 0.8;
+    animation: fall 1s ease-out forwards;
+  }
+  @keyframes fall {
+    0% {
+      transform: translateY(0) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(300px) rotate(720deg);
+      opacity: 0;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="info" id="infoBox"></div>
+  <button onclick="goBack()">뒤로가기</button>
+  <img id="tissueImage" src="tissue.png" alt="휴지 이미지">
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const toiletId = params.get("id");
+
+    // 화장실 데이터 (모두 휴지 수 포함)
+    const data = {
+      T1: { name: "남자 화장실 1", tissueCount: 169 },
+      T2: { name: "남자 화장실 2", tissueCount: 0 },
+      T3: { name: "남자 화장실 3", tissueCount: 17 }
+    };
+
+    const infoBox = document.getElementById("infoBox");
+    const tissueImage = document.getElementById("tissueImage");
+    const toilet = data[toiletId];
+
+    function updateDisplay() {
+      if (toilet.tissueCount > 0) {
+        infoBox.innerHTML = `<p>${toilet.name}<br>휴지: ${toilet.tissueCount}칸 사용가능</p>`;
+        tissueImage.src = "tissue.png";
+        tissueImage.style.opacity = "1";
+        tissueImage.style.cursor = "pointer";
+      } else {
+        infoBox.innerHTML = `<p>${toilet.name}<br>휴지 없음 ❌</p>`;
+        tissueImage.src = "used_tissue.png";
+        tissueImage.style.opacity = "0.6";
+        tissueImage.style.cursor = "not-allowed";
+      }
+
+      // 텍스트 애니메이션
+      infoBox.classList.add("animate");
+      setTimeout(() => infoBox.classList.remove("animate"), 300);
+    }
+
+    updateDisplay();
+
+    // 휴지 클릭 이벤트
+    tissueImage.addEventListener("click", () => {
+      if (toilet.tissueCount <= 0) return; // 더 이상 클릭 불가
+      toilet.tissueCount--;
+      updateDisplay();
+      dropTissuePiece();
+    });
+
+    // 휴지조각 떨어지는 효과
+    function dropTissuePiece() {
+      const piece = document.createElement("div");
+      piece.classList.add("piece");
+
+      // 랜덤한 시작 위치
+      const startX = window.innerWidth / 2 + (Math.random() * 100 - 50);
+      const startY = window.innerHeight / 2 + 100;
+      piece.style.left = `${startX}px`;
+      piece.style.top = `${startY}px`;
+      piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+
+      document.body.appendChild(piece);
+
+      // 애니메이션 끝나면 삭제
+      setTimeout(() => piece.remove(), 1000);
+    }
+
+    function goBack() {
+      window.location.href = `toilet_detail.html?id=${toiletId}`;
+    }
+  </script>
+</body>
+</html>

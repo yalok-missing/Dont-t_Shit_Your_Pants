@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>화장실 레이더 맵</title>
+<style>
+  body {
+    margin: 0;
+    background: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  canvas {
+    border: 2px solid white;
+  }
+  button {
+    margin-top: 30px;
+    padding: 10px 20px;
+    background-color: #00ff44;
+    color: rgb(0, 0, 0);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+  
+  <canvas id="mapCanvas" width="1080" height="640"></canvas>
+  <button onclick="goBack()">뒤로가기</button>
+  <script>
+const canvas = document.getElementById("mapCanvas");
+const ctx = canvas.getContext("2d");
+
+const toilets = [
+  { id: "T1", x: 920, y: 470, available: true },
+  { id: "T2", x: 920, y: 535, available: true },
+  { id: "T3", x: 920, y: 600, available: false }
+];
+
+function goBack() {
+  window.location.href = "index.html";
+}
+
+let alpha = 0; // 페이드인 투명도
+
+// 글리치 노이즈 생성 함수
+function drawGlitch() {
+  const glitchCount = 20; // 선 갯수
+  for(let i=0; i<glitchCount; i++){
+    const y = Math.random()*canvas.height;
+    const height = 1 + Math.random()*2;
+    const offset = Math.random()*10 - 5; // 좌우 흔들림
+    ctx.fillStyle = `rgba(0,255,0,${Math.random()*0.2})`;
+    ctx.fillRect(offset, y, canvas.width, height);
+  }
+
+  // 작은 픽셀 노이즈
+  for(let i=0; i<200; i++){
+    const x = Math.random()*canvas.width;
+    const y = Math.random()*canvas.height;
+    ctx.fillStyle = `rgba(0,255,0,${Math.random()*0.1})`;
+    ctx.fillRect(x, y, 1, 1);
+  }
+}
+
+function drawMap() {
+  // 1. 배경
+  ctx.fillStyle = `rgba(0,0,0,${0.6 + 0.4*alpha})`;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // 2. 구조물
+  ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+  ctx.fillRect(0, 440, 455,210);
+  ctx.fillRect(685, 498, 30,200);
+  ctx.fillRect(450, 503, 60,200);
+  ctx.fillRect(980, 438, 120,200);
+
+  ctx.beginPath();
+  ctx.rect(0, 0, canvas.width, canvas.height);
+  ctx.rect(0, 0, 280,200);
+  ctx.rect(280, 0, 280,200);
+  ctx.rect(560, 0, 280,200);
+  ctx.rect(840, 0, 280,200);
+  ctx.rect(0, 438, 1083,200);
+  ctx.rect(450, 503, 60,200);
+  ctx.rect(685, 498, 30,200);
+  ctx.rect(860, 438, 120,65);
+  ctx.rect(860, 503, 120,65);
+  ctx.rect(860, 568, 120,65);
+  ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+  ctx.lineWidth = 10;
+  ctx.stroke();
+
+  // 3. 화장실 표시
+  toilets.forEach(t => {
+    ctx.beginPath();
+    ctx.rect(t.x - 15, t.y - 15, 30, 30);
+    ctx.fillStyle = t.available ? "blue" : "red";
+    ctx.fill();
+    ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  });
+
+  // 4. 글리치 효과
+  drawGlitch();
+}
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  drawMap();
+
+  if(alpha < 1) alpha += 0.01;
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+
+// 클릭 이벤트 (화장실 이동)
+canvas.addEventListener("click", (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  toilets.forEach(t => {
+    if (x > t.x - 15 && x < t.x + 15 && y > t.y - 15 && y < t.y + 15) {
+      window.location.href = `toilet_detail_admin.html?id=${t.id}`;
+    }
+  });
+});
+</script>
+
+
+</body>
+</html>

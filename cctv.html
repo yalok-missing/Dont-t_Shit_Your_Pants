@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>CCTV District Monitor</title>
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: black;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .noise {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/d/d1/Static_noise.gif');
+    background-size: cover;
+    opacity: 0.05;
+    pointer-events: none;
+    z-index: 100;
+    mix-blend-mode: lighten;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 10px;
+    width: 90vw;
+    height: 90vh;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+  }
+
+  .district {
+    background: #000;
+    color: white;
+    font-family: 'Consolas', monospace;
+    font-weight: bold;
+    font-size: 1.1em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    border: 2px solid #333;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+
+  .district::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    width: 80%;
+    height: 2px;
+    background: white;
+    transform: translateY(-50%);
+  }
+
+  .district span {
+    position: relative;
+    background: black;
+    padding: 2px 6px;
+    z-index: 1;
+  }
+
+  .district:hover {
+    transform: scale(1.1);
+    border-color: #00ff44;
+    box-shadow: 0 0 15px #00ff44;
+    z-index: 5;
+  }
+
+  /* 클릭 가능한 District 1, 7 강조 */
+  .district[data-id="1"], .district[data-id="7"] {
+    cursor: pointer;
+  }
+
+  .district[data-id="1"]:hover {
+    box-shadow: 0 0 20px #00ff44;
+    border-color: #00ff44;
+  }
+
+  .district[data-id="7"]:hover {
+    box-shadow: 0 0 20px #0077ff;
+    border-color: #0077ff;
+    transform: scale(1.12);
+  }
+
+  .cctv-label {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: #00ff44;
+    font-family: monospace;
+    font-size: 1.2em;
+    text-shadow: 0 0 8px #00ff44;
+    animation: blink 1s infinite alternate;
+    z-index: 200;
+  }
+
+  @keyframes blink {
+    from { opacity: 1; }
+    to { opacity: 0.3; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="cctv-label">📹 CCTV ACTIVE</div>
+  <div class="noise"></div>
+
+  <div class="grid" id="grid"></div>
+
+<script>
+  const grid = document.getElementById("grid");
+
+  for (let i = 1; i <= 16; i++) {
+    const div = document.createElement("div");
+    div.className = "district";
+    div.dataset.id = i;
+    div.innerHTML = `<span>District ${i}</span>`;
+    
+    // 클릭 시 이동
+    if (i === 1) {
+      div.addEventListener("click", () => {
+        window.location.href = "index.html";
+      });
+    } else if (i === 7) {
+      div.addEventListener("click", () => {
+        window.location.href = "admin.html";
+      });
+    }
+
+    grid.appendChild(div);
+  }
+</script>
+
+</body>
+</html>

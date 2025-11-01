@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Don'tShitYourPants</title>
+<style>
+  body {
+    background: black;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  h1 { margin-bottom: 40px; }
+  button {
+    padding: 15px 40px;
+    font-size: 20px;
+    border: none;
+    border-radius: 12px;
+    background-color: #00cc66;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  button:hover {
+    background-color: #00ff88;
+  }
+</style>
+</head>
+<body>
+  <h1>Don't-Shit-Your-Pants!</h1>
+  <button onclick="goToMap()">화장실 찾기 🚻</button>
+  <br>
+  <br>
+  <button onclick="goToAdmin()">관리자 화면 </button>
+
+  <script>
+    function goToMap() {
+      window.location.href = "radar_map.html";
+    }
+    function goToAdmin() {
+      window.location.href = "cctv.html";
+    }
+  </script>
+</body>
+</html>
